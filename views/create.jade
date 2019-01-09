@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  form(action="create", method="POST")
+    .form-group
+      label(for="filmName") Film Name
+      input#filmName.form-control(name="title", type="text")
+    .form-group
+      label(for="runtime") Runtime
+      input#runtime.form-control(name="runtime", type="text")
+    .form-group
+      label(for="summary") Summary
+      input#summary.form-control(name="summary", type="text")
+    .form-group
+      label(for="imdbRating") ImDb Rating
+      input#imdbRating.form-control(name="imdb_rating", type="text")
+    .form-group
+      label(for="releaseDate") Release Date
+      input#releaseDate.form-control(name="release_date", type="date")
+
+    .form-group
+      .btn-group
+        button.btn.btn-primary(type="submit") Create
+        button.btn.btn-danger Cancel

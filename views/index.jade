@@ -1,0 +1,24 @@
+extends layout
+
+block content
+  h1= title
+  p Welcome to #{title}
+
+  table
+    thead
+      th title
+      th release date
+      th imdb rating
+      th actors
+      th runtime
+    tbody
+      each film in movies
+        tr
+          td= film.title
+          td= film.release_date
+          td= film.imdb_rating
+          td
+            if film.actors
+              each actor in film.actors
+                | #{actor}
+          td= film.runtime
