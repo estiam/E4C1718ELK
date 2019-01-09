@@ -11,6 +11,7 @@ block content
       th imdb rating
       th actors
       th runtime
+      th
     tbody
       each film in movies
         tr
@@ -23,3 +24,5 @@ block content
               each actor in film.actors
                 | #{actor}
           td= film.runtime
+          td
+            a(href="/delete/#{film._id}") Supprimer

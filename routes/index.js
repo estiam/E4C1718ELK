@@ -21,6 +21,8 @@ router.get('/create', function (req, res, next) {
 router.post('/create', function (req, res, next) {
   const film = req.body;
 
+  film.actors = film.actors.split(', ');
+
   mongoose.model('Movie').create(film, function (err, item) {
     if (!err)
       return res.redirect('/');
@@ -33,13 +35,37 @@ router.get('/edit/:id', function (req, res, next) {
   mongoose.model('Movie').findById(req.params.id, function (err, item) {
     if (err)
       return res.send(err);
+      const film = item.toObject();
+      let count = 0;
+
+      if(item.actors)
+        item.actors.forEach(actor => {
+          film.actors += actor;
+          if(count < item.actors - 1)
+            film.actors += ', ';
+            
+          count += 1;
+        })
 
     res.render('edit', { film: item });
   });
 });
 
 router.post('/edit/:id', function (req, res, next) {
-  mongoose.model('Movie').findByIdAndUpdate(req.params.id, req.body, function (err, item) {
+  const film = req.body;
+  
+  film.actors = film.actors.split(', ');
+  
+  mongoose.model('Movie').findByIdAndUpdate(req.params.id, film, function (err, item) {
+    if (!err)
+      return res.redirect('/');
+
+    res.send(err);
+  });
+});
+
+router.get('/delete/:id', function (req, res, next) {
+  mongoose.model('Movie').findByIdAndRemove(req.params.id, function (err, item) {
     if (!err)
       return res.redirect('/');
 
