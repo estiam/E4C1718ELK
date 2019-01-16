@@ -81,13 +81,38 @@ router.get('/search', (req, res, next) => {
   // req.query.q
 
   mongoose.model('Movie').search({
-    match: {
-      '_all': req.query.q
+    dis_max: {
+      queries: [
+        {
+          function_score: {
+            query: {
+              match: {
+                'title.ngram': req.query.q
+              }
+            },
+            script_score: {
+              script: '_score * 0.7'
+            }
+          }
+        },
+        {
+          term: {
+            'title.keyword': {
+              'value': req.query.q,
+              boost: 5
+            }
+          }
+        }
+      ]
     }
   }, (err, items) => {
     if (err)
       return res.send(err);
-    res.render('index', { movies: items.hits.hits.map(item => item._source) });
+    res.render('index', { movies: items.hits.hits.map(item => {
+      const temp = item._source;
+      temp.score = item._score;
+      return temp;
+    }) });
   });
 });
 
@@ -96,7 +121,7 @@ router.get('/search', (req, res, next) => {
 
 // localhost:3000/seen?q=batman
 router.get('/seen', (req, res, next) => {
-  let match = req.query.q ? { match: { "title": req.query.q }} : { match_all: {} };
+  let match = req.query.q ? { match: { "title": req.query.q } } : { match_all: {} };
 
   mongoose.model('Movie').search({
     bool: {
@@ -115,8 +140,8 @@ router.get('/seen', (req, res, next) => {
 });
 
 router.get('/notseen', (req, res, next) => {
-  let match = req.query.q ? { match: { "title": req.query.q }} : { match_all: {} };
-  
+  let match = req.query.q ? { match: { "title": req.query.q } } : { match_all: {} };
+
   mongoose.model('Movie').search({
     bool: {
       must: { // must, filter, must_not, should
