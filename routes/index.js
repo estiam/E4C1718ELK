@@ -37,17 +37,17 @@ router.get('/edit/:id', function (req, res, next) {
   mongoose.model('Movie').findById(req.params.id, function (err, item) {
     if (err)
       return res.send(err);
-      const film = item.toObject();
-      let count = 0;
+    const film = item.toObject();
+    let count = 0;
 
-      if(item.actors)
-        item.actors.forEach(actor => {
-          film.actors += actor;
-          if(count < item.actors - 1)
-            film.actors += ', ';
+    if (item.actors)
+      item.actors.forEach(actor => {
+        film.actors += actor;
+        if (count < item.actors - 1)
+          film.actors += ', ';
 
-          count += 1;
-        })
+        count += 1;
+      })
 
     res.render('edit', { film: item });
   });
@@ -55,9 +55,9 @@ router.get('/edit/:id', function (req, res, next) {
 
 router.post('/edit/:id', function (req, res, next) {
   const film = req.body;
-  
+
   film.actors = film.actors.split(', ');
-  
+
   mongoose.model('Movie').findByIdAndUpdate(req.params.id, film, function (err, item) {
     if (!err)
       return res.redirect('/');
@@ -74,4 +74,63 @@ router.get('/delete/:id', function (req, res, next) {
     res.send(err);
   });
 });
+
+router.get('/search', (req, res, next) => {
+
+  // localhost:3000/search?q=<MA RECHERCHE>
+  // req.query.q
+
+  mongoose.model('Movie').search({
+    match: {
+      '_all': req.query.q
+    }
+  }, (err, items) => {
+    if (err)
+      return res.send(err);
+    res.render('index', { movies: items.hits.hits.map(item => item._source) });
+  });
+});
+
+
+// localhost:3000/notseen => q= 
+
+// localhost:3000/seen?q=batman
+router.get('/seen', (req, res, next) => {
+  let match = req.query.q ? { match: { "title": req.query.q }} : { match_all: {} };
+
+  mongoose.model('Movie').search({
+    bool: {
+      must: { // must, filter, must_not, should
+        match
+      },
+      filter: {
+        term: { seen: true }
+      }
+    }
+  }, (err, items) => {
+    if (err)
+      return res.send(err);
+    res.render('index', { movies: items.hits.hits.map(item => item._source) });
+  });
+});
+
+router.get('/notseen', (req, res, next) => {
+  let match = req.query.q ? { match: { "title": req.query.q }} : { match_all: {} };
+  
+  mongoose.model('Movie').search({
+    bool: {
+      must: { // must, filter, must_not, should
+        match
+      },
+      filter: {
+        term: { seen: false }
+      }
+    }
+  }, (err, items) => {
+    if (err)
+      return res.send(err);
+    res.render('index', { movies: items.hits.hits.map(item => item._source) });
+  });
+});
+
 module.exports = router;
