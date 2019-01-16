@@ -21,6 +21,8 @@ router.get('/create', function (req, res, next) {
 router.post('/create', function (req, res, next) {
   const film = req.body;
 
+  film.seen = film.seen ? true : false;
+
   film.actors = film.actors.split(', ');
 
   mongoose.model('Movie').create(film, function (err, item) {
@@ -43,7 +45,7 @@ router.get('/edit/:id', function (req, res, next) {
           film.actors += actor;
           if(count < item.actors - 1)
             film.actors += ', ';
-            
+
           count += 1;
         })
 

@@ -7,7 +7,8 @@ let MovieSchema = new Schema({
   imdb_rating: Number,
   runtime: Number,
   summary: String,
-  actors : [String]
+  actors : [String],
+  seen : Boolean
 });
 
 module.exports = mongoose.model('Movie', MovieSchema);
